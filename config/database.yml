@@ -14,13 +14,46 @@
 # Configure Using Gemfile
 # gem 'pg'
 #
-development:
-  adapter: postgresql
+default: &default
+  adapter: makara_postgresql
   encoding: unicode
-  database: makara-repro-4-0_development
+  # For details on connection pooling, see rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: 5
-  username: makara-repro-4-0
-  password:
+  host: 192.168.59.103
+  username: yammer
+  password: postgres
+  makara:
+
+    # the following are default values
+    blacklist_duration: 5
+    master_ttl: 5
+    sticky: true
+    rescue_connection_failures: true
+
+    # list your connections with the override values (they're merged into the top-level config)
+    # be sure to provide the role if master, role is assumed to be a slave if not provided
+    connections:
+      - role: master
+        port: 5432
+      - role: slave
+        port: 6432
+      - role: slave
+        port: 7432
+
+development:
+  <<: *default
+
+  database: yam_development
+
+  # The specified database role being used to connect to postgres.
+  # To create additional roles in postgres see `$ createuser --help`.
+  # When left blank, postgres will use the default role. This is
+  # the same name as the operating system user that initialized the database.
+  #username: failover
+
+  # The password associated with the postgres role (username).
+  #password:
 
   # Connect on a TCP socket. Omitted by default since the client uses a
   # domain socket that doesn't need configuration. Windows does not have
@@ -44,17 +77,28 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  adapter: postgresql
-  encoding: unicode
-  database: makara-repro-4-0_test
-  pool: 5
-  username: makara-repro-4-0
-  password:
+  <<: *default
+  database: failover_test
 
+# As with config/secrets.yml, you never want to store sensitive information,
+# like your database password, in your source code. If your source code is
+# ever seen by anyone, they now have access to your database.
+#
+# Instead, provide the password as a unix environment variable when you boot
+# the app. Read http://guides.rubyonrails.org/configuring.html#configuring-a-database
+# for a full rundown on how to provide these environment variables in a
+# production deployment.
+#
+# On Heroku and other platform providers, you may have a full connection URL
+# available as an environment variable. For example:
+#
+#   DATABASE_URL="postgres://myuser:mypass@localhost/somedatabase"
+#
+# You can use this database configuration with:
+#
+#   production:
+#     url: <%= ENV['DATABASE_URL'] %>
+#
 production:
-  adapter: postgresql
-  encoding: unicode
-  database: makara-repro-4-0_production
-  pool: 5
-  username: makara-repro-4-0
-  password:
+  <<: *default
+  database: yam_development
